@@ -30,14 +30,14 @@ def build_words_with_ts(data):
     return words_ts
 
 
-def build_sentenance_start_end(doc, words_ts, audio_buffer):
+def build_sentence_start_end(doc, words_ts, audio_buffer):
     """
     doc: spacy doc
     words_ts: from build_words_with_ts (word, start, end)
 
     return: (start, end, text)
     """
-    sentenance_ts = []
+    sentence_ts = []
 
     word_idx = 0
     end_word_idx = 0
@@ -60,16 +60,16 @@ def build_sentenance_start_end(doc, words_ts, audio_buffer):
         )
         end = words_ts[end_word_idx - 1][2] + audio_buffer
 
-        sentenance_ts.append((start, end, sent.text))
+        sentence_ts.append((start, end, sent.text))
         word_idx = end_word_idx
-    return sentenance_ts
+    return sentence_ts
 
 
 def split_video_into_audio_seg(in_video, timestamps, out_name, out_dir):
     """
     in_video: file to slice up
     timestamps: tuple (start, end) as str
-    outname: base name for the clips
+    out_name: base name for the clips
     out_dir: dir to save slices in
     """
     if not os.path.exists(out_dir):
@@ -108,19 +108,19 @@ def translate_setup(from_code, to_code):
     argostranslate.package.install_from_path(package_to_install.download())
 
 
-def translate_sentenaces(sents, from_code, to_code):
+def translate_sentences(sents, from_code, to_code):
     return [argostranslate.translate.translate(s, from_code, to_code) for s in sents]
 
 
-def write_anki_import(file_path, sentenances, translation, audio_files, tags=None):
-    assert len(sentenances) == len(translation) == len(audio_files)
+def write_anki_import(file_path, sentences, translation, audio_files, tags=None):
+    assert len(sentences) == len(translation) == len(audio_files)
     with open(file_path, "w", encoding="utf-8") as f:
         if tags:
             f.write(TAGS.format(tags=tags) + "\n")
 
         for i, audio in enumerate(audio_files):
             a = AUDIO_FMT.format(fname=audio)
-            f.write(f"{a}{FILE_DELIM}{sentenances[i]}<br>{translation[i]}\n")
+            f.write(f"{a}{FILE_DELIM}{sentences[i]}<br>{translation[i]}\n")
 
 
 def transcribe(in_file, lang_code):
@@ -142,7 +142,7 @@ def main(
     source_file: the file to process
     input_language, output_language: the input anf output language codes
     audio_save_dir : where to save the audi clips
-    json_transcribe_file: optional input file to use instrad of doing transcribe with this script, needs word timestamps
+    json_transcribe_file: optional input file to use instead of doing transcribe with this script, needs word timestamps
     audio_buffer amount of time to add onto audio clips start and end
     save_json_file: location to save transcript json file after transcribe
     """
@@ -166,31 +166,31 @@ def main(
     if json_transcribe_file:
         with open(json_transcribe_file, "r", encoding="utf-8") as f:
             data = json.load(f)
-        log.info("whsiper transcribe loaded")
+        log.info("whisper transcribe loaded")
     else:
-        log.info("start whsiper transcribe")
+        log.info("start whisper transcribe")
         data = transcribe(str(source_file), input_language)
-        log.info("whsiper transcribe done")
+        log.info("whisper transcribe done")
         if save_json_file:
             with open(save_json_file, "w", encoding="utf-8") as f:
                 json.dump(data, f)
 
     words_ts = build_words_with_ts(data)
-    log.info("built sentance ts data...")
+    log.info("built sentence ts data...")
 
     src_txt = " ".join([w[0] for w in words_ts])
     doc = es_nlp(src_txt)
-    sentenance_ts = build_sentenance_start_end(doc, words_ts, audio_buffer)
-    _ts = [(str(s), str(e)) for (s, e, _) in sentenance_ts]
+    sentence_ts = build_sentence_start_end(doc, words_ts, audio_buffer)
+    _ts = [(str(s), str(e)) for (s, e, _) in sentence_ts]
 
     log.info("starting file split")
     created_files = split_video_into_audio_seg(
         source_file, _ts, base_name, audio_save_dir
     )
-    sents = [t for (_s, _e, t) in sentenance_ts]
+    sents = [t for (_s, _e, t) in sentence_ts]
     log.info("audio_created")
     log.info("starting translation")
-    translations = translate_sentenaces(sents, input_language, output_language)
+    translations = translate_sentences(sents, input_language, output_language)
 
     log.info(f"writing anki to ./{base_name}.txt")
     write_anki_import(f"./{base_name}.txt", sents, translations, created_files)
@@ -244,7 +244,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--audio-buffer",
         "-b",
-        help="Time to add on to start and end of audio sentenance clips",
+        help="Time to add on to start and end of audio sentence clips",
         default=AUDIO_BUFFER,
         type=float,
     )
