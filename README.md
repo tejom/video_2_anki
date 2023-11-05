@@ -6,7 +6,8 @@ The front of the card is the audio, the back is the transcription and translatio
 
 ## Set Up:
 use the requirements.txt
-ex: pip install -r requirements txt
+
+ex: `pip install -r requirements.txt`
 
 ### Dependency docs and custom set up:
 
