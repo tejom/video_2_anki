@@ -3,7 +3,6 @@ import argparse
 from pathlib import Path
 import os
 import subprocess
-import datetime
 import logging
 
 import spacy
