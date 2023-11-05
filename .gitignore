@@ -6,3 +6,5 @@
 *.tsv
 *.vtt
 *.sh
+
+!requirements.txt
