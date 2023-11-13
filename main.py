@@ -26,8 +26,10 @@ log = logging.getLogger()
 def download_youtube_audio(video_src, out_dir) -> Path:
     yt = YouTube(video_src)
     audio_stream = yt.streams.get_audio_only()
-    title = ''.join(filter(str.isalnum, yt.title))
-    file_name = audio_stream.download(output_path=out_dir, filename=f'yt_audio_{title}.mp4')
+    title = "".join(filter(str.isalnum, yt.title))
+    file_name = audio_stream.download(
+        output_path=out_dir, filename=f"yt_audio_{title}.mp4"
+    )
     log.info(f"Downloaded {yt.title} to {file_name}")
     return Path(file_name)
 
@@ -162,7 +164,7 @@ def main(
         source_file = download_youtube_audio(source, tmp_dir.name)
     else:
         source_file = Path(source)
-    
+
     # assert all files exist
     assert source_file.exists()
     assert audio_save_dir.exists() and audio_save_dir.is_dir()
@@ -229,7 +231,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "source", help="The full path to the video to process or Youtube video to download", type=str
+        "source",
+        help="The full path to the video to process or Youtube video to download",
+        type=str,
     )
     parser.add_argument(
         "--input-language",
