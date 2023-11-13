@@ -25,6 +25,10 @@ Generate clips from a video, save the audio clips and generate a txt file that c
 
 eg. `./video_2_anki --audio-save-dir=/path/to/Anki2/User\ 1/collection.media foreign_language_video.mp4`
 
+Or download straight from YouTube
+
+eg. `./video_2_anki --audio-save-dir=/path/to/Anki2/User\ 1/collection.media  https://www.youtube.com/watch?v=some-video-id`
+
 This will save all the videos to the path, using the Anki path means you can just import the txt file.
 
 Txt file example:
