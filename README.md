@@ -9,6 +9,10 @@ use the requirements.txt
 
 ex: `pip install -r requirements.txt`
 
+Make sure you have ffmpeg installed. It's used for splitting the videos.
+
+https://www.ffmpeg.org/
+
 ### Dependency docs and custom set up:
 
 - For Spacy languages or GPU usage check https://spacy.io/usage

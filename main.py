@@ -4,11 +4,13 @@ from pathlib import Path
 import os
 import subprocess
 import logging
+from tempfile import TemporaryDirectory
 
 import spacy
 import argostranslate.package
 import argostranslate.translate
 import whisper
+from pytube import YouTube
 
 FILE_DELIM = ";"
 TAGS = "#tags:{tags}"
@@ -19,6 +21,15 @@ AUDIO_BUFFER = 0.35
 SPACY_MODELS = {"es": "es_core_news_sm"}
 
 log = logging.getLogger()
+
+
+def download_youtube_audio(video_src, out_dir) -> Path:
+    yt = YouTube(video_src)
+    audio_stream = yt.streams.get_audio_only()
+    title = ''.join(filter(str.isalnum, yt.title))
+    file_name = audio_stream.download(output_path=out_dir, filename=f'yt_audio_{title}.mp4')
+    log.info(f"Downloaded {yt.title} to {file_name}")
+    return Path(file_name)
 
 
 def build_words_with_ts(data):
@@ -130,7 +141,7 @@ def transcribe(in_file, lang_code):
 
 
 def main(
-    source_file: Path,
+    source: str,
     input_language: str,
     output_language: str,
     audio_save_dir: Path,
@@ -146,6 +157,12 @@ def main(
     audio_buffer amount of time to add onto audio clips start and end
     save_json_file: location to save transcript json file after transcribe
     """
+    if "youtube" in source and source.startswith("http"):
+        tmp_dir = TemporaryDirectory()
+        source_file = download_youtube_audio(source, tmp_dir.name)
+    else:
+        source_file = Path(source)
+    
     # assert all files exist
     assert source_file.exists()
     assert audio_save_dir.exists() and audio_save_dir.is_dir()
@@ -212,7 +229,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "source_file", help="The full path to the video to process", type=Path
+        "source", help="The full path to the video to process or Youtube video to download", type=str
     )
     parser.add_argument(
         "--input-language",
