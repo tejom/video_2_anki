@@ -18,7 +18,7 @@ AUDIO_FMT = "[sound:{fname}]"
 
 AUDIO_BUFFER = 0.35
 
-SPACY_MODELS = {"es": "es_core_news_sm"}
+SPACY_MODELS = {"es": "es_core_news_sm", "it": 'it_core_news_sm'}
 
 log = logging.getLogger()
 
@@ -154,7 +154,7 @@ def main(
     """
     source_file: the file to process
     input_language, output_language: the input anf output language codes
-    audio_save_dir : where to save the audi clips
+    audio_save_dir : where to save the audio clips
     json_transcribe_file: optional input file to use instead of doing transcribe with this script, needs word timestamps
     audio_buffer amount of time to add onto audio clips start and end
     save_json_file: location to save transcript json file after transcribe
@@ -171,7 +171,7 @@ def main(
     if json_transcribe_file:
         assert json_transcribe_file.exists()
     if save_json_file:
-        assert save_json_file.exists()
+        assert not save_json_file.exists()
 
     spacy_model = SPACY_MODELS.get(input_language)
     base_name = source_file.parts[-1].split(".")[0]
@@ -270,7 +270,7 @@ if __name__ == "__main__":
         type=float,
     )
     parser.add_argument(
-        "--save_json_file",
+        "--save-json-file",
         "-w",
         help="location to save whisper's json data from transcription, can be used to reload and avoid rerunning transcription",
         type=Path,
